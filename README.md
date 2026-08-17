@@ -14,9 +14,9 @@ Run them locally from a terminal with Unity installed:
 
 Set `UNITY_EDITOR_PATH` first if Unity is installed somewhere other than `C:\Program Files\Unity\Hub\Editor\6000.4.7f1\Editor\Unity.exe`.
 
-The current tests cover `BoardManager` board generation and verify that `Assets/Scenes/Main.unity` assigns `Scavengers2_SpriteSheet_39` as the ground tile and `Scavengers2_SpriteSheet_1` through `Scavengers2_SpriteSheet_8` as wall tiles.
+The current tests cover `BoardManager` board generation and cell lookup, `PlayerController` movement and blocked movement, and verify that `Assets/Scenes/Main.unity` assigns `Scavengers2_SpriteSheet_39` as the ground tile and `Scavengers2_SpriteSheet_1` through `Scavengers2_SpriteSheet_8` as wall tiles.
 
-Coverage reporting is not configured yet because the Unity Code Coverage package is not installed.
+The script enables Unity Code Coverage for `Assembly-CSharp` and fails if reported line coverage is below 90%.
 
 ## GitHub Actions
 

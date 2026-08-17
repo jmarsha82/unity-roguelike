@@ -1,7 +1,9 @@
 {
     "name": "UnityRoguelike.EditModeTests",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "Unity.InputSystem"
+    ],
     "includePlatforms": [
         "Editor"
     ],
