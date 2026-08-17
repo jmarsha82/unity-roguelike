@@ -25,7 +25,7 @@ jobs:
         with:
           lfs: true
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: Library
           key: Library-${{ runner.os }}-${{ hashFiles('ProjectSettings/ProjectVersion.txt', 'Packages/manifest.json', 'Packages/packages-lock.json') }}
