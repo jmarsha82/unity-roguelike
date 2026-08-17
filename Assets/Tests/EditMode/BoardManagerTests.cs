@@ -87,8 +87,8 @@ public class BoardManagerTests
         {
             boardManager.SendMessage("Start", SendMessageOptions.RequireReceiver);
 
-            Assert.That(((BoardManager.CellData)Invoke(boardManager, "GetCellData", new Vector2Int(1, 1))).Passable, Is.True);
-            Assert.That(((BoardManager.CellData)Invoke(boardManager, "GetCellData", new Vector2Int(0, 1))).Passable, Is.False);
+            Assert.That(GetField(Invoke(boardManager, "GetCellData", new Vector2Int(1, 1)), "Passable"), Is.True);
+            Assert.That(GetField(Invoke(boardManager, "GetCellData", new Vector2Int(0, 1)), "Passable"), Is.False);
             Assert.That(Invoke(boardManager, "GetCellData", new Vector2Int(-1, 1)), Is.Null);
             Assert.That(Invoke(boardManager, "GetCellData", new Vector2Int(3, 1)), Is.Null);
             Assert.That(Invoke(boardManager, "GetCellData", new Vector2Int(1, -1)), Is.Null);
@@ -286,17 +286,18 @@ public class BoardManagerTests
     {
         GameObject boardObject = new GameObject("BoardManager");
         Grid grid = boardObject.AddComponent<Grid>();
-        boardManager = boardObject.AddComponent(FindBoardManagerType());
-        BoardManager.CellData[,] boardData = new BoardManager.CellData[width, height];
+        Type boardManagerType = FindBoardManagerType();
+        Type cellDataType = boardManagerType.GetNestedType("CellData");
+        boardManager = boardObject.AddComponent(boardManagerType);
+        Array boardData = Array.CreateInstance(cellDataType, width, height);
 
         for (int y = 0; y < height; ++y)
         {
             for (int x = 0; x < width; ++x)
             {
-                boardData[x, y] = new BoardManager.CellData
-                {
-                    Passable = x > 0 && y > 0
-                };
+                object cellData = Activator.CreateInstance(cellDataType);
+                SetField(cellData, "Passable", x > 0 && y > 0);
+                boardData.SetValue(cellData, x, y);
             }
         }
 
@@ -325,20 +326,20 @@ public class BoardManagerTests
         return tile;
     }
 
-    static object GetField(Component component, string fieldName)
+    static object GetField(object instance, string fieldName)
     {
-        return component.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).GetValue(component);
+        return instance.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).GetValue(instance);
     }
 
-    static void SetField(Component component, string fieldName, object value)
+    static void SetField(object instance, string fieldName, object value)
     {
-        component.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).SetValue(component, value);
+        instance.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).SetValue(instance, value);
     }
 
-    static object Invoke(Component component, string methodName, params object[] parameters)
+    static object Invoke(object instance, string methodName, params object[] parameters)
     {
-        return component.GetType()
+        return instance.GetType()
             .GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-            .Invoke(component, parameters);
+            .Invoke(instance, parameters);
     }
 }
