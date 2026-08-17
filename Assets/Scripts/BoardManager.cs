@@ -1,27 +1,22 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
-
-
 public class BoardManager : MonoBehaviour
 {
     public class CellData
     {
         public bool Passable;
     }
+
     private CellData[,] m_BoardData;
     private Tilemap m_Tilemap;
     private Grid m_Grid;
-
 
     public int Width;
     public int Height;
     public Tile[] GroundTiles;
     public Tile[] WallTiles;
-    public PlayerController Player;
 
-
-    // Start is called before the first frame update
-    void Start()
+    public void Init()
     {
         m_Tilemap = GetComponentInChildren<Tilemap>();
         m_Grid = GetComponentInChildren<Grid>();
@@ -49,8 +44,6 @@ public class BoardManager : MonoBehaviour
                 m_Tilemap.SetTile(new Vector3Int(x, y, 0), tile);
             }
         }
-
-        Player.Spawn(this, new Vector2Int(1, 1));
     }
 
     public Vector3 CellToWorld(Vector2Int cellIndex)

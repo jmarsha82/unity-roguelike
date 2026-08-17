@@ -29,7 +29,6 @@ if (Test-Path -LiteralPath $CoverageResultsPath) {
 
 $UnityProcess = Start-Process -FilePath $UnityPath -ArgumentList @(
     "-batchmode",
-    "-quit",
     "-projectPath", $ProjectPath,
     "-runTests",
     "-testPlatform", "EditMode",
@@ -61,16 +60,18 @@ if ([string]::IsNullOrWhiteSpace($SummaryPath)) {
 $CoverageNode = Select-Xml -Xml $CoverageSummary -XPath "//*[@line-rate or @linecoverage or @sequenceCoverage]" |
     Select-Object -First 1 -ExpandProperty Node
 
-if ($null -eq $CoverageNode) {
-    throw "Could not read line coverage from '$SummaryPath'."
-}
-
-$LineCoverage = if ($CoverageNode.'line-rate') {
-    [double]$CoverageNode.'line-rate' * 100
-} elseif ($CoverageNode.linecoverage) {
-    [double]$CoverageNode.linecoverage
+if ($null -ne $CoverageNode) {
+    $LineCoverage = if ($CoverageNode.'line-rate') {
+        [double]$CoverageNode.'line-rate' * 100
+    } elseif ($CoverageNode.linecoverage) {
+        [double]$CoverageNode.linecoverage
+    } else {
+        [double]$CoverageNode.sequenceCoverage
+    }
+} elseif ($CoverageSummary.CoverageReport.Summary.Linecoverage) {
+    $LineCoverage = [double]$CoverageSummary.CoverageReport.Summary.Linecoverage
 } else {
-    [double]$CoverageNode.sequenceCoverage
+    throw "Could not read line coverage from '$SummaryPath'."
 }
 
 $FormattedCoverage = $LineCoverage.ToString("0.##")

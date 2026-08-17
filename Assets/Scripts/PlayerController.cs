@@ -18,42 +18,50 @@ public class PlayerController : MonoBehaviour
         transform.position = m_Board.CellToWorld(m_CellPosition);
     }
 
+    public bool TryMove(Vector2Int direction)
+    {
+        Vector2Int newCellTarget = m_CellPosition + direction;
+        BoardManager.CellData cellData = m_Board.GetCellData(newCellTarget);
+
+        if (cellData != null && cellData.Passable)
+        {
+            GameManager.Instance.TurnManager.Tick();
+            MoveTo(newCellTarget);
+            return true;
+        }
+
+        return false;
+    }
 
     private void Update()
     {
-        Vector2Int newCellTarget = m_CellPosition;
+        Vector2Int direction = Vector2Int.zero;
         bool hasMoved = false;
 
         if (Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
-            newCellTarget.y += 1;
+            direction = Vector2Int.up;
             hasMoved = true;
         }
         else if (Keyboard.current.downArrowKey.wasPressedThisFrame)
         {
-            newCellTarget.y -= 1;
+            direction = Vector2Int.down;
             hasMoved = true;
         }
         else if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
         {
-            newCellTarget.x += 1;
+            direction = Vector2Int.right;
             hasMoved = true;
         }
         else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
         {
-            newCellTarget.x -= 1;
+            direction = Vector2Int.left;
             hasMoved = true;
         }
 
         if (hasMoved)
         {
-            //check if the new position is passable, then move there if it is.
-            BoardManager.CellData cellData = m_Board.GetCellData(newCellTarget);
-
-            if (cellData != null && cellData.Passable)
-            {
-                MoveTo(newCellTarget);
-            }
+            TryMove(direction);
         }
     }
 
