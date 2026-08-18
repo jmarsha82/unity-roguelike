@@ -18,7 +18,9 @@ public class BoardManager : MonoBehaviour
     public int Height;
     public Tile[] GroundTiles;
     public Tile[] WallTiles;
+    public WallObject WallPrefab;
     public FoodObject FoodPrefab;
+
 
     public void Init()
     {
@@ -57,6 +59,7 @@ public class BoardManager : MonoBehaviour
 
         //remove the starting point of the player! It's not empty, the player is there
         m_EmptyCellsList.Remove(new Vector2Int(1, 1));
+        GenerateWall();
         GenerateFood();
     }
 
@@ -95,5 +98,31 @@ public class BoardManager : MonoBehaviour
             newFood.transform.position = CellToWorld(coord);
             data.ContainedObject = newFood;
         }
+    }
+
+    void GenerateWall()
+    {
+        int wallCount = Random.Range(6, 10);
+        for (int i = 0; i < wallCount; ++i)
+        {
+            int randomIndex = Random.Range(0, m_EmptyCellsList.Count);
+            Vector2Int coord = m_EmptyCellsList[randomIndex];
+
+            m_EmptyCellsList.RemoveAt(randomIndex);
+            CellData data = m_BoardData[coord.x, coord.y];
+            WallObject newWall = Instantiate(WallPrefab);
+
+            //init the wall
+            newWall.Init(coord);
+
+            newWall.transform.position = CellToWorld(coord);
+
+            data.ContainedObject = newWall;
+        }
+    }
+
+    public void SetCellTile(Vector2Int cellIndex, Tile tile)
+    {
+        m_Tilemap.SetTile(new Vector3Int(cellIndex.x, cellIndex.y, 0), tile);
     }
 }
