@@ -231,6 +231,24 @@ public class BoardManagerTests : InputTestFixture
     }
 
     [Test]
+    public void PlayerControllerTryMoveBeforeSpawnReturnsFalse()
+    {
+        GameObject playerObject = new GameObject("Player");
+        Component playerController = playerObject.AddComponent(FindPlayerControllerType());
+
+        try
+        {
+            object moved = Invoke(playerController, "TryMove", Vector2Int.up);
+
+            Assert.That(moved, Is.False);
+        }
+        finally
+        {
+            UnityEngine.Object.DestroyImmediate(playerObject);
+        }
+    }
+
+    [Test]
     public void PlayerControllerIgnoresFramesWithoutInput()
     {
         Keyboard keyboard = InputSystem.AddDevice<Keyboard>();

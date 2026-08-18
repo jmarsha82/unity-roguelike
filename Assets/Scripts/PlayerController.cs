@@ -20,6 +20,12 @@ public class PlayerController : MonoBehaviour
 
     public bool TryMove(Vector2Int direction)
     {
+        if (m_Board == null)
+        {
+            Debug.LogWarning("PlayerController tried to move before it was spawned.");
+            return false;
+        }
+
         Vector2Int newCellTarget = m_CellPosition + direction;
         BoardManager.CellData cellData = m_Board.GetCellData(newCellTarget);
 
