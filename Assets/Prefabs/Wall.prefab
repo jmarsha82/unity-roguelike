@@ -44,4 +44,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 186ca77cceafc5f4fa0b16b41b7765d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WallObject
-  ObstacleTile: {fileID: 11400000, guid: 580cc268db5a570468a598357cc5245b, type: 2}
+  ObstacleTile: {fileID: 11400000, guid: 1079db6a3f8de9e49b7f40f970bcb0c2, type: 2}
+  MaxHealth: 3

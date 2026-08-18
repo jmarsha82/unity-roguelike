@@ -5,6 +5,12 @@ public class PlayerController : MonoBehaviour
 {
     private BoardManager m_Board;
     private Vector2Int m_CellPosition;
+    private bool m_IsGameOver;
+
+    public void Init()
+    {
+        m_IsGameOver = false;
+    }
 
     public void Spawn(BoardManager boardManager, Vector2Int cell)
     {
@@ -51,6 +57,15 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (m_IsGameOver)
+        {
+            if (Keyboard.current.enterKey.wasPressedThisFrame)
+            {
+                GameManager.Instance.StartNewGame();
+            }
+
+            return;
+        }
         Vector2Int direction = Vector2Int.zero;
         bool hasMoved = false;
 
@@ -79,6 +94,11 @@ public class PlayerController : MonoBehaviour
         {
             TryMove(direction);
         }
+    }
+
+    public void GameOver()
+    {
+        m_IsGameOver = true;
     }
 
 }
