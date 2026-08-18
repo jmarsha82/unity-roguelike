@@ -38,7 +38,12 @@ public class GameManager : MonoBehaviour
 
     void OnTurnHappen()
     {
-        m_FoodAmount -= 1;
+        ChangeFood(-1);
+    }
+
+    public void ChangeFood(int amount)
+    {
+        m_FoodAmount += amount;
         UpdateFoodLabel();
     }
 
