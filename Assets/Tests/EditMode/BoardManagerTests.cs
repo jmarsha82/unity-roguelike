@@ -99,19 +99,23 @@ public class BoardManagerTests : InputTestFixture
         GameObject boardObject = CreateBoardWithCells(3, 3, out Component boardManager);
         GameObject playerObject = new GameObject("Player");
         Component playerController = playerObject.AddComponent(FindPlayerControllerType());
+        int ticks = 0;
+        Action listener = () => ticks += 1;
 
         try
         {
+            AddEventHandler(turnManager, "OnTick", listener);
             Invoke(playerController, "Spawn", boardManager, new Vector2Int(1, 1));
 
             object moved = Invoke(playerController, "TryMove", Vector2Int.up);
 
             Assert.That(moved, Is.True);
             Assert.That(GetField(playerController, "m_CellPosition"), Is.EqualTo(new Vector2Int(1, 2)));
-            Assert.That(GetField(turnManager, "m_TurnCount"), Is.EqualTo(2));
+            Assert.That(ticks, Is.EqualTo(1));
         }
         finally
         {
+            RemoveEventHandler(turnManager, "OnTick", listener);
             ResetGameManagerInstance();
             UnityEngine.Object.DestroyImmediate(gameManagerObject);
             UnityEngine.Object.DestroyImmediate(playerObject);
@@ -126,9 +130,12 @@ public class BoardManagerTests : InputTestFixture
         GameObject boardObject = CreateBoardWithCells(3, 3, out Component boardManager);
         GameObject playerObject = new GameObject("Player");
         Component playerController = playerObject.AddComponent(FindPlayerControllerType());
+        int ticks = 0;
+        Action listener = () => ticks += 1;
 
         try
         {
+            AddEventHandler(turnManager, "OnTick", listener);
             Invoke(playerController, "Spawn", boardManager, new Vector2Int(1, 1));
             Vector3 startingPosition = playerObject.transform.position;
 
@@ -137,7 +144,7 @@ public class BoardManagerTests : InputTestFixture
             Assert.That(moved, Is.True);
             Assert.That(GetField(playerController, "m_CellPosition"), Is.EqualTo(new Vector2Int(2, 1)));
             Assert.That(playerObject.transform.position, Is.Not.EqualTo(startingPosition));
-            Assert.That(GetField(turnManager, "m_TurnCount"), Is.EqualTo(2));
+            Assert.That(ticks, Is.EqualTo(1));
 
             Vector3 movedPosition = playerObject.transform.position;
             object blocked = Invoke(playerController, "TryMove", Vector2Int.right);
@@ -145,10 +152,11 @@ public class BoardManagerTests : InputTestFixture
             Assert.That(blocked, Is.False);
             Assert.That(GetField(playerController, "m_CellPosition"), Is.EqualTo(new Vector2Int(2, 1)));
             Assert.That(playerObject.transform.position, Is.EqualTo(movedPosition));
-            Assert.That(GetField(turnManager, "m_TurnCount"), Is.EqualTo(2));
+            Assert.That(ticks, Is.EqualTo(1));
         }
         finally
         {
+            RemoveEventHandler(turnManager, "OnTick", listener);
             ResetGameManagerInstance();
             UnityEngine.Object.DestroyImmediate(gameManagerObject);
             UnityEngine.Object.DestroyImmediate(playerObject);
@@ -163,9 +171,12 @@ public class BoardManagerTests : InputTestFixture
         GameObject boardObject = CreateBoardWithCells(3, 3, out Component boardManager);
         GameObject playerObject = new GameObject("Player");
         Component playerController = playerObject.AddComponent(FindPlayerControllerType());
+        int ticks = 0;
+        Action listener = () => ticks += 1;
 
         try
         {
+            AddEventHandler(turnManager, "OnTick", listener);
             Invoke(playerController, "Spawn", boardManager, new Vector2Int(1, 1));
             Vector3 startingPosition = playerObject.transform.position;
 
@@ -174,10 +185,11 @@ public class BoardManagerTests : InputTestFixture
             Assert.That(moved, Is.False);
             Assert.That(GetField(playerController, "m_CellPosition"), Is.EqualTo(new Vector2Int(1, 1)));
             Assert.That(playerObject.transform.position, Is.EqualTo(startingPosition));
-            Assert.That(GetField(turnManager, "m_TurnCount"), Is.EqualTo(1));
+            Assert.That(ticks, Is.EqualTo(0));
         }
         finally
         {
+            RemoveEventHandler(turnManager, "OnTick", listener);
             ResetGameManagerInstance();
             UnityEngine.Object.DestroyImmediate(gameManagerObject);
             UnityEngine.Object.DestroyImmediate(playerObject);
@@ -192,9 +204,12 @@ public class BoardManagerTests : InputTestFixture
         GameObject boardObject = CreateBoardWithCells(3, 3, out Component boardManager);
         GameObject playerObject = new GameObject("Player");
         Component playerController = playerObject.AddComponent(FindPlayerControllerType());
+        int ticks = 0;
+        Action listener = () => ticks += 1;
 
         try
         {
+            AddEventHandler(turnManager, "OnTick", listener);
             Invoke(playerController, "Spawn", boardManager, new Vector2Int(1, 1));
             Vector3 startingPosition = playerObject.transform.position;
 
@@ -203,10 +218,11 @@ public class BoardManagerTests : InputTestFixture
             Assert.That(moved, Is.False);
             Assert.That(GetField(playerController, "m_CellPosition"), Is.EqualTo(new Vector2Int(1, 1)));
             Assert.That(playerObject.transform.position, Is.EqualTo(startingPosition));
-            Assert.That(GetField(turnManager, "m_TurnCount"), Is.EqualTo(1));
+            Assert.That(ticks, Is.EqualTo(0));
         }
         finally
         {
+            RemoveEventHandler(turnManager, "OnTick", listener);
             ResetGameManagerInstance();
             UnityEngine.Object.DestroyImmediate(gameManagerObject);
             UnityEngine.Object.DestroyImmediate(playerObject);
@@ -244,15 +260,15 @@ public class BoardManagerTests : InputTestFixture
         }
     }
 
-    [Test]
-    public void PlayerControllerUpdateUsesArrowKeysForMovement()
+    [TestCase("up", 1, 2, 1)]
+    [TestCase("right", 2, 1, 1)]
+    [TestCase("down", 1, 1, 0)]
+    [TestCase("left", 1, 1, 0)]
+    public void PlayerControllerUpdateUsesArrowKeysForMovement(string keyName, int expectedX, int expectedY, int expectedTicks)
     {
         Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
 
-        AssertArrowKeyMovesPlayer(keyboard.upArrowKey, new Vector2Int(1, 2), 2);
-        AssertArrowKeyMovesPlayer(keyboard.rightArrowKey, new Vector2Int(2, 1), 2);
-        AssertArrowKeyMovesPlayer(keyboard.downArrowKey, new Vector2Int(1, 1), 1);
-        AssertArrowKeyMovesPlayer(keyboard.leftArrowKey, new Vector2Int(1, 1), 1);
+        AssertArrowKeyMovesPlayer(GetArrowKey(keyboard, keyName), new Vector2Int(expectedX, expectedY), expectedTicks);
     }
 
     [Test]
@@ -285,15 +301,56 @@ public class BoardManagerTests : InputTestFixture
     }
 
     [Test]
-    public void TurnManagerStartsAtOneAndTicksUp()
+    public void GameManagerConsumesTurnsByReducingFood()
+    {
+        GameObject gameManagerObject = new GameObject("GameManager");
+        GameObject boardObject = CreateBoardObject(3, 3, out Component boardManager);
+        GameObject playerObject = new GameObject("Player");
+        Component playerController = playerObject.AddComponent(FindPlayerControllerType());
+        Component gameManager = gameManagerObject.AddComponent(FindGameManagerType());
+
+        SetField(gameManager, "BoardManager", boardManager);
+        SetField(gameManager, "PlayerController", playerController);
+
+        try
+        {
+            Invoke(gameManager, "Start");
+            Invoke(GetProperty(gameManager, "TurnManager"), "Tick");
+
+            Assert.That(GetField(gameManager, "m_FoodAmount"), Is.EqualTo(99));
+        }
+        finally
+        {
+            ResetGameManagerInstance();
+            UnityEngine.Object.DestroyImmediate(gameManagerObject);
+            UnityEngine.Object.DestroyImmediate(boardObject);
+            UnityEngine.Object.DestroyImmediate(playerObject);
+        }
+    }
+
+    [Test]
+    public void TurnManagerStartsAtOneAndRaisesTickEvent()
     {
         object turnManager = Activator.CreateInstance(FindTurnManagerType());
+        int ticks = 0;
+        Action listener = () => ticks += 1;
 
         Assert.That(GetField(turnManager, "m_TurnCount"), Is.EqualTo(1));
 
+        AddEventHandler(turnManager, "OnTick", listener);
         Invoke(turnManager, "Tick");
+        RemoveEventHandler(turnManager, "OnTick", listener);
 
-        Assert.That(GetField(turnManager, "m_TurnCount"), Is.EqualTo(2));
+        Assert.That(ticks, Is.EqualTo(1));
+        Assert.That(GetField(turnManager, "m_TurnCount"), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void TurnManagerTickWithoutListenersDoesNotThrow()
+    {
+        object turnManager = Activator.CreateInstance(FindTurnManagerType());
+
+        Assert.DoesNotThrow(() => Invoke(turnManager, "Tick"));
     }
 
     [Test]
@@ -426,15 +483,18 @@ public class BoardManagerTests : InputTestFixture
         SetStaticProperty(FindGameManagerType(), "Instance", null);
     }
 
-    void AssertArrowKeyMovesPlayer(KeyControl key, Vector2Int expectedCell, int expectedTurnCount)
+    void AssertArrowKeyMovesPlayer(KeyControl key, Vector2Int expectedCell, int expectedTicks)
     {
         GameObject gameManagerObject = CreateGameManager(out Component gameManager, out object turnManager);
         GameObject boardObject = CreateBoardWithCells(3, 3, out Component boardManager);
         GameObject playerObject = new GameObject("Player");
         Component playerController = playerObject.AddComponent(FindPlayerControllerType());
+        int ticks = 0;
+        Action listener = () => ticks += 1;
 
         try
         {
+            AddEventHandler(turnManager, "OnTick", listener);
             Invoke(playerController, "Spawn", boardManager, new Vector2Int(1, 1));
 
             Press(key);
@@ -442,14 +502,32 @@ public class BoardManagerTests : InputTestFixture
             Release(key);
 
             Assert.That(GetField(playerController, "m_CellPosition"), Is.EqualTo(expectedCell));
-            Assert.That(GetField(turnManager, "m_TurnCount"), Is.EqualTo(expectedTurnCount));
+            Assert.That(ticks, Is.EqualTo(expectedTicks));
         }
         finally
         {
+            RemoveEventHandler(turnManager, "OnTick", listener);
             ResetGameManagerInstance();
             UnityEngine.Object.DestroyImmediate(gameManagerObject);
             UnityEngine.Object.DestroyImmediate(playerObject);
             UnityEngine.Object.DestroyImmediate(boardObject);
+        }
+    }
+
+    static KeyControl GetArrowKey(Keyboard keyboard, string keyName)
+    {
+        switch (keyName)
+        {
+            case "up":
+                return keyboard.upArrowKey;
+            case "down":
+                return keyboard.downArrowKey;
+            case "right":
+                return keyboard.rightArrowKey;
+            case "left":
+                return keyboard.leftArrowKey;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(keyName), keyName, "Unknown arrow key.");
         }
     }
 
@@ -483,6 +561,16 @@ public class BoardManagerTests : InputTestFixture
     static void SetStaticProperty(Type type, string propertyName, object value)
     {
         type.GetProperty(propertyName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic).SetValue(null, value);
+    }
+
+    static void AddEventHandler(object instance, string eventName, Delegate handler)
+    {
+        instance.GetType().GetEvent(eventName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).AddEventHandler(instance, handler);
+    }
+
+    static void RemoveEventHandler(object instance, string eventName, Delegate handler)
+    {
+        instance.GetType().GetEvent(eventName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).RemoveEventHandler(instance, handler);
     }
 
     static object Invoke(object instance, string methodName, params object[] parameters)
