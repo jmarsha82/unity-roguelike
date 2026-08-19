@@ -375,6 +375,10 @@ MonoBehaviour:
   WallPrefab: {fileID: 5632764603341017621, guid: f093f252bebd81542b27bf9b7e58d9a8, type: 3}
   FoodPrefab: {fileID: 1643383864347830555, guid: bf544c8634689ae48b830821539a079c, type: 3}
   ExitCellPrefab: {fileID: 6356541719367968342, guid: a9e5563e83692624d858c13e685f65cb, type: 3}
+  EnemyPrefab: {fileID: 4610204301691883210, guid: 0dbdff18ff91d574685455ac6a0ce59a, type: 3}
+  BaseWallCount: 6
+  BaseFoodCount: 5
+  BaseEnemyCount: 1
 --- !u!1 &1073678026
 GameObject:
   m_ObjectHideFlags: 0
@@ -543,6 +547,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f65013a04e350da42ae2f24c4a2b18f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCharacter
+  MoveSpeed: 5
 --- !u!212 &1323493527
 SpriteRenderer:
   serializedVersion: 2
@@ -671,6 +676,9 @@ MonoBehaviour:
   BoardManager: {fileID: 463183493}
   PlayerController: {fileID: 1323493526}
   UIDoc: {fileID: 356790309}
+  StartingFood: 20
+  LevelFoodBonus: 5
+  EnemyScoreValue: 25
 --- !u!4 &2093617388
 Transform:
   m_ObjectHideFlags: 0

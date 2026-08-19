@@ -266,7 +266,7 @@ public class BoardManagerTests : InputTestFixture
 
             Assert.That(GetField(playerController, "m_CellPosition"), Is.EqualTo(new Vector2Int(1, 1)));
             Assert.That(playerObject.transform.position, Is.EqualTo(startingPosition));
-            Assert.That(GetField(turnManager, "m_TurnCount"), Is.EqualTo(1));
+            Assert.That(GetProperty(turnManager, "TurnCount"), Is.EqualTo(1));
         }
         finally
         {
@@ -279,9 +279,13 @@ public class BoardManagerTests : InputTestFixture
     }
 
     [TestCase("up", 1, 2, 1)]
+    [TestCase("w", 1, 2, 1)]
     [TestCase("right", 2, 1, 1)]
+    [TestCase("d", 2, 1, 1)]
     [TestCase("down", 1, 1, 0)]
+    [TestCase("s", 1, 1, 0)]
     [TestCase("left", 1, 1, 0)]
+    [TestCase("a", 1, 1, 0)]
     public void PlayerControllerUpdateUsesArrowKeysForMovement(string keyName, int expectedX, int expectedY, int expectedTicks)
     {
         Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
@@ -335,7 +339,7 @@ public class BoardManagerTests : InputTestFixture
             Invoke(gameManager, "Start");
             Invoke(GetProperty(gameManager, "TurnManager"), "Tick");
 
-            Assert.That(GetField(gameManager, "m_FoodAmount"), Is.EqualTo(99));
+            Assert.That(GetField(gameManager, "m_FoodAmount"), Is.EqualTo(19));
         }
         finally
         {
@@ -353,14 +357,14 @@ public class BoardManagerTests : InputTestFixture
         int ticks = 0;
         Action listener = () => ticks += 1;
 
-        Assert.That(GetField(turnManager, "m_TurnCount"), Is.EqualTo(1));
+        Assert.That(GetProperty(turnManager, "TurnCount"), Is.EqualTo(1));
 
         AddEventHandler(turnManager, "OnTick", listener);
         Invoke(turnManager, "Tick");
         RemoveEventHandler(turnManager, "OnTick", listener);
 
         Assert.That(ticks, Is.EqualTo(1));
-        Assert.That(GetField(turnManager, "m_TurnCount"), Is.EqualTo(1));
+        Assert.That(GetProperty(turnManager, "TurnCount"), Is.EqualTo(2));
     }
 
     [Test]
@@ -538,12 +542,20 @@ public class BoardManagerTests : InputTestFixture
         {
             case "up":
                 return keyboard.upArrowKey;
+            case "w":
+                return keyboard.wKey;
             case "down":
                 return keyboard.downArrowKey;
+            case "s":
+                return keyboard.sKey;
             case "right":
                 return keyboard.rightArrowKey;
+            case "d":
+                return keyboard.dKey;
             case "left":
                 return keyboard.leftArrowKey;
+            case "a":
+                return keyboard.aKey;
             default:
                 throw new ArgumentOutOfRangeException(nameof(keyName), keyName, "Unknown arrow key.");
         }

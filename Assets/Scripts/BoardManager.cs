@@ -21,8 +21,12 @@ public class BoardManager : MonoBehaviour
     public WallObject WallPrefab;
     public FoodObject FoodPrefab;
     public ExitCellObject ExitCellPrefab;
+    public CellObject EnemyPrefab;
+    public int BaseWallCount = 6;
+    public int BaseFoodCount = 5;
+    public int BaseEnemyCount = 1;
 
-    public void Init()
+    public void Init(int level = 1)
     {
         m_Tilemap = GetComponentInChildren<Tilemap>();
         m_Grid = GetComponentInChildren<Grid>();
@@ -60,10 +64,15 @@ public class BoardManager : MonoBehaviour
         m_EmptyCellsList.Remove(new Vector2Int(1, 1));
 
         Vector2Int endCoord = new Vector2Int(Width - 2, Height - 2);
-        AddObject(Instantiate(ExitCellPrefab), endCoord);
+        if (ExitCellPrefab != null)
+        {
+            AddObject(Instantiate(ExitCellPrefab), endCoord);
+        }
+
         m_EmptyCellsList.Remove(endCoord);
-        GenerateWall();
-        GenerateFood();
+        GenerateWall(level);
+        GenerateFood(level);
+        GenerateEnemies(level);
     }
 
     public Vector3 CellToWorld(Vector2Int cellIndex)
@@ -82,31 +91,48 @@ public class BoardManager : MonoBehaviour
         return m_BoardData[cellIndex.x, cellIndex.y];
     }
 
-    void GenerateWall()
+    void GenerateWall(int level)
     {
-        int wallCount = Random.Range(6, 10);
+        if (WallPrefab == null)
+        {
+            return;
+        }
+
+        int wallCount = Mathf.Min(BaseWallCount + level, m_EmptyCellsList.Count);
         for (int i = 0; i < wallCount; ++i)
         {
-            int randomIndex = Random.Range(0, m_EmptyCellsList.Count);
-            Vector2Int coord = m_EmptyCellsList[randomIndex];
-
-            m_EmptyCellsList.RemoveAt(randomIndex);
             WallObject newWall = Instantiate(WallPrefab);
-            AddObject(newWall, coord);
+            AddObjectAtRandomEmptyCell(newWall);
         }
     }
 
-    void GenerateFood()
+    void GenerateFood(int level)
     {
-        int foodCount = 5;
+        if (FoodPrefab == null)
+        {
+            return;
+        }
+
+        int foodCount = Mathf.Min(BaseFoodCount + Mathf.FloorToInt(level * 0.5f), m_EmptyCellsList.Count);
         for (int i = 0; i < foodCount; ++i)
         {
-            int randomIndex = Random.Range(0, m_EmptyCellsList.Count);
-            Vector2Int coord = m_EmptyCellsList[randomIndex];
-
-            m_EmptyCellsList.RemoveAt(randomIndex);
             FoodObject newFood = Instantiate(FoodPrefab);
-            AddObject(newFood, coord);
+            AddObjectAtRandomEmptyCell(newFood);
+        }
+    }
+
+    void GenerateEnemies(int level)
+    {
+        if (EnemyPrefab == null)
+        {
+            return;
+        }
+
+        int enemyCount = Mathf.Min(BaseEnemyCount + Mathf.FloorToInt(level * 0.5f), m_EmptyCellsList.Count);
+        for (int i = 0; i < enemyCount; ++i)
+        {
+            CellObject newEnemy = Instantiate(EnemyPrefab);
+            AddObjectAtRandomEmptyCell(newEnemy);
         }
     }
 
@@ -123,9 +149,34 @@ public class BoardManager : MonoBehaviour
         obj.Init(coord);
     }
 
+    bool AddObjectAtRandomEmptyCell(CellObject obj)
+    {
+        if (m_EmptyCellsList.Count == 0)
+        {
+            Destroy(obj.gameObject);
+            return false;
+        }
+
+        int randomIndex = Random.Range(0, m_EmptyCellsList.Count);
+        Vector2Int coord = m_EmptyCellsList[randomIndex];
+
+        m_EmptyCellsList.RemoveAt(randomIndex);
+        AddObject(obj, coord);
+        return true;
+    }
+
     public Tile GetCellTile(Vector2Int cellIndex)
     {
         return m_Tilemap.GetTile<Tile>(new Vector3Int(cellIndex.x, cellIndex.y, 0));
+    }
+
+    public void ClearCellObject(Vector2Int cellIndex, CellObject obj)
+    {
+        CellData data = GetCellData(cellIndex);
+        if (data != null && data.ContainedObject == obj)
+        {
+            data.ContainedObject = null;
+        }
     }
 
     public void Clean()

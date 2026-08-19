@@ -11,10 +11,12 @@ public class PlayerController : MonoBehaviour
     private Vector3 m_MoveTarget;
 
     public float MoveSpeed = 5.0f;
+    public Vector2Int Cell => m_CellPosition;
 
     public void Init()
     {
         m_IsGameOver = false;
+        m_IsMoving = false;
     }
 
     private void Awake()
@@ -72,8 +74,6 @@ public class PlayerController : MonoBehaviour
             else if (cellData.ContainedObject.PlayerWantsToEnter())
             {
                 MoveTo(newCellTarget);
-                //Call PlayerEntered AFTER moving the player! Otherwise not in cell yet
-                cellData.ContainedObject.PlayerEntered();
                 return true;
             }
         }
@@ -120,7 +120,17 @@ public class PlayerController : MonoBehaviour
             direction = Vector2Int.up;
             hasMoved = true;
         }
+        else if (Keyboard.current.wKey.wasPressedThisFrame)
+        {
+            direction = Vector2Int.up;
+            hasMoved = true;
+        }
         else if (Keyboard.current.downArrowKey.wasPressedThisFrame)
+        {
+            direction = Vector2Int.down;
+            hasMoved = true;
+        }
+        else if (Keyboard.current.sKey.wasPressedThisFrame)
         {
             direction = Vector2Int.down;
             hasMoved = true;
@@ -130,7 +140,17 @@ public class PlayerController : MonoBehaviour
             direction = Vector2Int.right;
             hasMoved = true;
         }
+        else if (Keyboard.current.dKey.wasPressedThisFrame)
+        {
+            direction = Vector2Int.right;
+            hasMoved = true;
+        }
         else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
+        {
+            direction = Vector2Int.left;
+            hasMoved = true;
+        }
+        else if (Keyboard.current.aKey.wasPressedThisFrame)
         {
             direction = Vector2Int.left;
             hasMoved = true;
@@ -139,6 +159,11 @@ public class PlayerController : MonoBehaviour
         if (hasMoved)
         {
             TryMove(direction);
+        }
+        else if (Keyboard.current.spaceKey.wasPressedThisFrame
+            || Keyboard.current.periodKey.wasPressedThisFrame)
+        {
+            GameManager.Instance.WaitTurn();
         }
     }
 

@@ -3,15 +3,22 @@ using UnityEngine;
 public class TurnManager
 {
     public event System.Action OnTick;
-    private int m_TurnCount;
+
+    public int TurnCount { get; private set; }
 
     public TurnManager()
     {
-        m_TurnCount = 1;
+        TurnCount = 1;
     }
 
     public void Tick()
     {
+        TurnCount++;
         OnTick?.Invoke();
+    }
+
+    public void Reset()
+    {
+        TurnCount = 1;
     }
 }

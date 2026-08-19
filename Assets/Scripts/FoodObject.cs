@@ -6,6 +6,7 @@ public class FoodObject : CellObject
 
    public override void PlayerEntered()
    {
+       GameManager.Instance.BoardManager.ClearCellObject(m_Cell, this);
        Destroy(gameObject);
       
        //increase food
